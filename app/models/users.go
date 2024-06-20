@@ -30,7 +30,12 @@ func (u *User) CreateUser() (err error) {
 		password,
 		created_at) values (?, ?, ?, ?, ?)`
 
-	_, err = Db.Exec(cmd, createUUID(), u.Name, u.Email, Encrypt(u.PassWord), time.Now())
+	_, err = Db.Exec(cmd,
+		createUUID(),
+		u.Name,
+		u.Email,
+		Encrypt(u.PassWord),
+		time.Now())
 
 	if err != nil {
 		log.Fatalln(err)
@@ -107,8 +112,7 @@ func (u *User) CreateSession() (session Session, err error) {
 		&session.UUID,
 		&session.Email,
 		&session.UserID,
-		&session.CreatedAt,
-	)
+		&session.CreatedAt)
 	return session, err
 }
 

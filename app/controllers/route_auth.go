@@ -31,7 +31,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	generateHTML(w, nil, "layout", "public_navbar", "login")
 }
 
-func auhtenticate(w http.ResponseWriter, r *http.Request) {
+func authenticate(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	user, err := models.GetUserByEmail(r.PostFormValue("email"))
 	if err != nil {
