@@ -8,7 +8,12 @@ import (
 
 func signup(w http.ResponseWriter, r *http.Request) {
 	if r.Method == "GET" {
-		generateHTML(w, nil, "layout", "public_navbar", "signup")
+		_, err := session(w, r)
+		if err != nil {
+			generateHTML(w, nil, "layout", "public_navbar", "signup")
+		} else {
+			http.Redirect(w, r, "/todos", http.StatusFound)
+		}
 	} else if r.Method == "POST" {
 		err := r.ParseForm()
 		if err != nil {
@@ -28,10 +33,15 @@ func signup(w http.ResponseWriter, r *http.Request) {
 }
 
 func login(w http.ResponseWriter, r *http.Request) {
-	generateHTML(w, nil, "layout", "public_navbar", "login")
+	_, err := session(w, r)
+	if err != nil {
+		generateHTML(w, nil, "layout", "public_navbar", "login")
+	} else {
+		http.Redirect(w, r, "/todos", http.StatusFound)
+	}
 }
 
-func auhtenticate(w http.ResponseWriter, r *http.Request) {
+func authenticate(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	user, err := models.GetUserByEmail(r.PostFormValue("email"))
 	if err != nil {
@@ -55,4 +65,16 @@ func auhtenticate(w http.ResponseWriter, r *http.Request) {
 	} else {
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
+}
+
+func logout(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("_cookie")
+	if err != nil {
+		log.Println(err)
+	}
+	if err != http.ErrNoCookie {
+		session := models.Session{UUID: cookie.Value}
+		session.DeleteSessionByUUID()
+	}
+	http.Redirect(w, r, "/login", http.StatusFound)
 }
