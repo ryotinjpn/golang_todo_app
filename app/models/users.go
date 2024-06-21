@@ -12,6 +12,7 @@ type User struct {
 	Email     string
 	PassWord  string
 	CreatedAt time.Time
+	Todos     []Todo
 }
 
 type Session struct {
@@ -53,8 +54,7 @@ func GetUser(id int) (user User, err error) {
 		&user.Name,
 		&user.Email,
 		&user.PassWord,
-		&user.CreatedAt,
-	)
+		&user.CreatedAt)
 	return user, err
 }
 
@@ -86,8 +86,7 @@ func GetUserByEmail(email string) (user User, err error) {
 		&user.Name,
 		&user.Email,
 		&user.PassWord,
-		&user.CreatedAt,
-	)
+		&user.CreatedAt)
 	return user, err
 }
 
@@ -124,8 +123,7 @@ func (sess *Session) CheckSession() (valid bool, err error) {
 		&sess.UUID,
 		&sess.Email,
 		&sess.UserID,
-		&sess.CreatedAt,
-	)
+		&sess.CreatedAt)
 	if err != nil {
 		valid = false
 		return
@@ -134,4 +132,26 @@ func (sess *Session) CheckSession() (valid bool, err error) {
 		valid = true
 	}
 	return valid, err
+}
+
+func (sess *Session) DeleteSessionByUUID() (err error) {
+	cmd := `delete from sessions where uuid = ?`
+	_, err = Db.Exec(cmd, sess.UUID)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	return err
+}
+
+func (sess *Session) GetUserBySession() (user User, err error) {
+	user = User{}
+	cmd := `select id, uuid, name, email, created_at from users
+	where email = ?`
+	err = Db.QueryRow(cmd, sess.UserID).Scan(
+		&user.ID,
+		&user.UUID,
+		&user.Name,
+		&user.Email,
+		&user.CreatedAt)
+	return user, err
 }
